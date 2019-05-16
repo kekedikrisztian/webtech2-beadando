@@ -57,7 +57,7 @@ class CustomerForm extends React.Component{
         this.state.signedCustomer = id;
         this.setState({signed: true});
 
-        alert("Registration succeed!");
+        alert("Your registration is succeed!");
     };
 
     signOut = () =>  {
@@ -73,7 +73,7 @@ class CustomerForm extends React.Component{
         StoreActions.createOrder(shutter, orderID, customerID);
         StoreActions.listOrders(orderID);
 
-        alert("Creating order succeed!");
+        alert("Order created!");
     };
 
     selectShutter = (e) => {
@@ -82,60 +82,66 @@ class CustomerForm extends React.Component{
 
     render() {
         return (
-            <div className="form-content">
-                <div className="form-title">
+            <div className="user-form">
+                <div className="user-form__title">
                     {this.state.signed === false
                         ?
                         <span>Customer</span>
                         :
                         <div>
-                            <div className="form-title">
-                                Welcome {this.state.customers.firstName}
+                            Welcome {this.state.customers.map( customer => (
+                            customer.customerID === this.state.signedCustomer
+                                ?
+                                <span>{customer.firstName}</span>
+                                :
+                                ""
+                        ))}
+                            <div className="fab-button-holder">
+                                <button className="fab-button" onClick={this.signOut}>LOG<br/>OUT</button>
                             </div>
-                            <div>
-                            <button className="btn" onClick={this.signOut}>log out</button>
-                                <hr/>
-                        </div>
                         </div>
                     }
                 </div>
                 {this.state.signed === false
                     ?
                     <div>
-                        <div>
-                            <div>
-                                <div>
-                                    <div>Sign in with e-mail:</div>
+                        <div className="user-form__content">
+                            <div className="user-form__section-title">
+                                Sign in
+                            </div>
+                            <div className="user-form__section">
+                                <div className="input-holder">
                                     <input id="signInEmail" className="input-field" type="email"/>
+                                    <span className="input-label">E-mail</span>
                                 </div>
-                                <button className="btn" onClick={this.signIn}>
+                                <button className="user-form__btn" onClick={this.signIn}>
                                     Sign in
                                 </button>
                             </div>
                         </div>
                         <hr/>
-                        <div>
-                            <div className="form-subtitle">
+                        <div className="user-form__content">
+                            <div className="user-form__section-title">
                                 Registration
                             </div>
-                            <div>
-                                <div>
-                                    <div>First name</div>
+                            <div className="user-form__section">
+                                <div className="input-holder">
                                     <input id="firstName" className="input-field" type="text"/>
+                                    <span className="input-label">First name</span>
                                 </div>
-                                <div>
-                                    <div>Last name</div>
+                                <div className="input-holder">
                                     <input id="lastName" className="input-field" type="text"/>
+                                    <span className="input-label">Last name</span>
                                 </div>
-                                <div>
-                                    <div>E-mail</div>
-                                    <input id="email" type="text"/>
+                                <div className="input-holder">
+                                    <input id="email" className="input-field" type="text"/>
+                                    <span className="input-label">E-mail</span>
                                 </div>
-                                <div>
-                                    <div>Address</div>
+                                <div className="input-holder">
                                     <input id="address" className="input-field" type="text"/>
+                                    <span className="input-label">Address</span>
                                 </div>
-                                <button className="btn" onClick={this.registration}>
+                                <button className="user-form__btn" onClick={this.registration}>
                                     Registration
                                 </button>
                             </div>
@@ -143,69 +149,107 @@ class CustomerForm extends React.Component{
                     </div>
                     :
                     <div>
-                        <div>
-                            <div className="form-subtitle">
+                        <div className="user-form__content">
+                            <div className="user-form__section-title">
                                 Ordering
                             </div>
                             <div>
-                                <div>
-                                    <div>Window width (cm)</div>
-                                    <input id="windowWidth" type="text"/>
-                                </div>
-                                <div>
-                                    <div>Window height (cm)</div>
-                                    <input id="windowHeight" type="text"/>
-                                </div>
-                                <div>
-                                    <div className="margintop-10">
-                                        Shutter
+                                <div className="user-form__section">
+                                    <div className="input-holder">
+                                        <input id="windowWidth" className="input-field" type="text"/>
+                                        <span className="input-label">Window width</span>
                                     </div>
-                                    {this.state.shutters.map(shutter => (
-                                        <label className="block">
-                                            <input name="shutter" value={shutter.shutterID} type="radio" onClick={this.selectShutter}/>
-                                            <span>
-                                                {shutter.material}, {shutter.color}, {shutter.price} $
+                                    <div className="input-holder">
+                                        <input id="windowHeight" className="input-field" type="text"/>
+                                        <span className="input-label">Window height</span>
+                                    </div>
+                                    <div className="input-holder">
+                                        <div className="input-title">
+                                            Shutter
+                                        </div>
+                                        {this.state.shutters.map(shutter => (
+                                            <label className="radio-holder">
+                                                <input className="input-radio" name="shutter" value={shutter.shutterID} type="radio" onClick={this.selectShutter}/>
+                                                <span className="radio-label">
+                                                {shutter.material}, {shutter.color}, {shutter.price}
                                             </span>
-                                        </label>
+                                            </label>
                                         ))}
+                                    </div>
+                                    <button className="user-form__btn" onClick={this.createOrder}>
+                                        Send order
+                                    </button>
                                 </div>
-                                <button className="btn" onClick={this.createOrder}>
-                                    Send order
-                                </button>
                             </div>
                         </div>
                         <hr/>
-                        <div>
-                            <div className="form-subtitle">
-                                My orders
+                        <div className="user-form__content">
+                            <div className="user-form__section-title">
+                                List my orders
                             </div>
-                            <div>
+                            <div className="user-form__section">
                                 {this.state.orders.map(order => (
                                     order.customerID === this.state.signedCustomer
                                         ?
                                         <div>
-                                            <div>
-                                                <strong>Window: </strong> {order.windowWidth} cm * {order.windowHeight} cm
+                                            <div className="data-title">
+                                                Order ID
+                                            </div>
+                                            <div className="data-content">
+                                                {order.orderID}
+                                            </div>
+                                            <div className="data-title">
+                                                Window
+                                            </div>
+                                            <div className="data-content">
+                                                {order.windowWidth} * {order.windowHeight}
                                             </div>
                                             {this.state.shutters.map(shutter => (
                                                 shutter.shutterID === order.shutter
-                                                    ?
-                                                    <div>
-                                                        <div>
-                                                            <strong>Shutter's material: </strong> {shutter.material}
-                                                        </div>
-                                                        <div>
-                                                            <strong>Shutter's color: </strong> {shutter.color}
-                                                        </div>
-                                                        <div>
-                                                            <strong>Shutter's price: </strong> {shutter.price} $
-                                                        </div>
+                                                ?
+                                                <div>
+                                                    <div className="data-title">
+                                                        material of the shutter:
                                                     </div>
-                                                    :
-                                                    <div>
-
+                                                    <div className="data-content">
+                                                        {shutter.material}
                                                     </div>
+                                                    <div className="data-title">
+                                                        color of the shutter:
+                                                    </div>
+                                                    <div className="data-content">
+                                                        {shutter.color}
+                                                    </div>
+                                                </div>
+                                                :
+                                                ""
                                             ))}
+                                            {this.state.shutters.map(shutter => (
+                                                (shutter.shutterID === order.shutter) && (order.date)
+                                                    ?
+                                                <div>
+                                                    <div className="data-title">
+                                                        price of the shutter:
+                                                    </div>
+                                                    <div className="data-content">
+                                                        {shutter.price}$
+                                                    </div>
+                                                    <div className="data-title">
+                                                        price of the installation:
+                                                    </div>
+                                                    <div className="data-content">
+                                                        14$
+                                                    </div>
+                                                    <div className="data-title">
+                                                        final price:
+                                                    </div>
+                                                    <div className="data-content">
+                                                        {shutter.price} + 14$ = <strong>{shutter.price + 14}$</strong>
+                                                    </div>
+                                                </div>
+                                                    :
+                                                ""
+                                                ))}
                                             <hr/>
                                         </div>
                                         :

@@ -1,13 +1,11 @@
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
-const url = 'mongodb://localhost:27017';
+const url = 'mongodb://172.21.0.10:27017';
 const dbName = 'shutter-shop';
 const customerDatabase = 'customerDatabase';
 const orderDatabase = 'orderDatabase';
 const shutterDatabase = 'shutterDatabase';
-
-
 
 function createCustomer(request, callback) {
     var client = new MongoClient(url);
@@ -41,7 +39,6 @@ function readCustomer(findParam, callback) {
         client.close();
     })
 }
-
 
 function createOrder(request, callback) {
     var client = new MongoClient(url);

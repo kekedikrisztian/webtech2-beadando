@@ -1,100 +1,72 @@
 import React from 'react'
-
-import SakilaDispatcher from '../dispatcher/SakilaDispatcher'
-import ManagerConstants from "../constants/ManagerConstants";
 import ShutterStore from "../store/ShutterStore";
-import CustomerConstants from "../constants/CustomerConstants";
-import WorkerConstants from "../constants/WorkerConstants";
+import StoreActions from "../actions/StoreActions";
 
-class ManagerForm extends React.Component{
+
+class ManagerForm extends React.Component {
+
     constructor(props) {
         super(props);
         this.state = {
             listOrders: false,
-            jobs: [
-                {id: 0, wid: 0, customer: "Bela", address: "Miskolc, Teknős utca 27.", windowHeight: 100, windowWidth: 200, material: "wood", color: "brown", checked: true},
-                {id: 1, wid: 1, customer: "Erzsi", address: "Szeged, Kaja tér 14.", windowHeight: 120, windowWidth: 180, material: "plastic", color: "white", checked: false},
-                {id: 2, wid: undefined, customer: "Jozsi", address: "Győr, Nyúl utca 6.", windowHeight: 90, windowWidth: 220, material: "metal", color: "gray", checked: false}
-            ],
-            workers: [],
-            orders: [],
-            shutters: [],
-            customers: []
-        }
+            shutters: ShutterStore._shutters,
+            workers: ShutterStore._workers,
+            orders: ShutterStore._orders,
+            customers: ShutterStore._customers,
+            selectedWorker: [],
+            selectedShutter: []
+        };
 
-        this.handleChange = this.handleChange.bind(this);
-        ShutterStore.addChangeListener(this.handleChange);
+        StoreActions.listOrders();
+        StoreActions.listWorkers();
+        StoreActions.listShutters();
+        StoreActions.listCustomers();
+        this._onChange = this._onChange.bind(this);
+    }
+
+    _onChange(){
+        this.setState({orders : ShutterStore._orders});
+        this.setState({shutters : ShutterStore._shutters});
+        this.setState({workers : ShutterStore._workers});
+        this.setState({customers : ShutterStore._customers});
     }
 
     componentDidMount(){
-        SakilaDispatcher.handleViewAction(
-            { actionType: WorkerConstants.LIST_ORDERS }
-        );
-
-        SakilaDispatcher.handleViewAction(
-            { actionType: CustomerConstants.LIST_SHUTTERS }
-        );
-
-        SakilaDispatcher.handleViewAction(
-            { actionType: CustomerConstants.LIST_CUSTOMERS }
-        );
-
-        SakilaDispatcher.handleViewAction(
-            { actionType: ManagerConstants.LIST_WORKERS }
-        );
+        ShutterStore.addChangeListener(this._onChange);
     }
 
     componentWillUnmount(){
-
+        ShutterStore.removeChangeListener(this._onChange)
     }
 
-    handleChange() {
-        this.state.orders = ShutterStore._orders;
 
-        this.state.shutters = ShutterStore._shutters;
+    saveOrderSettings = (orderID, workerID) => {
+        workerID = this.state.selectedWorker;
+        StoreActions.saveOrderSettings(orderID, workerID);
+        StoreActions.listOrders(orderID);
 
-        this.state.customers = ShutterStore._customers;
+        alert("Order is assigned to " + workerID);
+    };
 
-        this.state.workers = ShutterStore._workers;
-    }
-
-    saveOrderSettings = (e) => {
-
-        let orderID = Number(e.target.name);
-        let workerID = Number(e.target.value);
-
-        SakilaDispatcher.handlePostAction({
-                actionType: ManagerConstants.ASSIGN_ORDER,
-                payload: {
-                    orderID: orderID,
-                    workerID: workerID
-                }
-            }
-        );
-    }
+    handleInputChange = (e) => {
+        this.setState({selectedWorker: Number(e.target.value)});
+    };
 
     setPayed = (e) => {
-        let orderID = Number(e.target.value);
+        StoreActions.setPayed(e);
+        StoreActions.listOrders(e);
 
-        SakilaDispatcher.handlePostAction({
-                actionType: ManagerConstants.CREATE_INVOICE,
-                payload: {
-                    orderID: orderID
-                }
-            }
-        );
-
-        e.target.className = "checked input-checkbox";
-    }
+        alert("Order is payed!");
+    };
 
     listOrders = () =>  {
         this.setState({listOrders: true});
-    }
+    };
 
     showData = (e) =>  {
         let identifier = e.target.name;
         document.getElementById(identifier).classList.toggle("show-more");
-    }
+    };
 
     render() {
         return (
@@ -168,9 +140,7 @@ class ManagerForm extends React.Component{
                                                 </div>
                                             </div>
                                             :
-                                            <div>
-
-                                            </div>
+                                            ""
                                             ))}
                                         <div>
 
@@ -213,28 +183,49 @@ class ManagerForm extends React.Component{
                                                 </div>
                                             </div>
                                             :
-                                            <div>
-
-                                            </div>
-                                            ))}
-
-                                        {order.state === "finished" || order.state === "payed"
-                                        ?
-                                        <div className="mt-16">
-                                            <label className="checkbox-holder">
-                                            <input className="input-checkbox" type="checkbox"
-                                                   value={order.orderID} checked={order.state === "payed"}
-                                                   onChange={this.setPayed}/>
-                                                <span className="checkbox">
-                                                    <strong>payed</strong>
-                                                </span>
-                                            </label>
-                                        </div>
-                                        :
+                                            ""
+                                        ))}
                                         <div>
-
+                                            {order.state === "finished"
+                                                ?
+                                                <div className="mt-16">
+                                                    <label className="checkbox-holder">
+                                                        <input className="input-checkbox" type="checkbox"
+                                                               name={order.shutter}
+                                                               value={order.orderID}
+                                                        />
+                                                        <span className="checkbox">
+                                                            <strong>payed</strong>
+                                                        </span>
+                                                    </label>
+                                                    <div>
+                                                        <button className="user-form__btn"  value={order.orderID}
+                                                                onClick={this.setPayed}>
+                                                            Save
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                :
+                                                ""
+                                            }
+                                            {order.state === "payed"
+                                                ?
+                                                <div className="mt-16">
+                                                    <label className="checkbox-holder">
+                                                        <input className="input-checkbox" type="checkbox"
+                                                               name={order.shutter}
+                                                               value={order.orderID}
+                                                               checked
+                                                        />
+                                                        <span className="checkbox">
+                                                            <strong>payed</strong>
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                                :
+                                                ""
+                                            }
                                         </div>
-                                        }
                                         <div className="mt-16">
                                             {!order.workerID
                                             ?
@@ -243,24 +234,22 @@ class ManagerForm extends React.Component{
                                                     Select worker
                                                 </div>
                                                 {this.state.workers.map(worker => (
-                                                    <label className="radio-holder" onClick={this.selectedRadio}>
-                                                        <input className="input-radio" name="worker" type="radio"/>
+                                                    <label className="radio-holder">
+                                                        <input className="input-radio" name="worker" value={worker.workerID} type="radio" onChange={this.handleInputChange}/>
                                                         <span className="radio-label">
                                                             {worker.workerID}
                                                         </span>
                                                     </label>
                                                 ))}
+                                                <div className="mt-16">
+                                                    <button className="user-form__btn" name={order.orderID} onClick={()=>this.saveOrderSettings(order.orderID)}>
+                                                        Save
+                                                    </button>
+                                                </div>
                                             </div>
                                             :
-                                            <div>
-
-                                            </div>
+                                            ""
                                             }
-                                        </div>
-                                        <div className="mt-16">
-                                            <button className="user-form__btn" name={order.orderID} onClick={this.saveOrderSettings}>
-                                                Save
-                                            </button>
                                         </div>
                                         <hr/>
                                     </div>

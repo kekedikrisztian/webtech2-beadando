@@ -1,13 +1,12 @@
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
-const url = 'mongodb://localhost:27017';
+const url = 'mongodb://172.21.0.10:27017';
 const dbName = 'shutter-shop';
 
 const customerDatabase = 'customerDatabase';
 const orderDatabase = 'orderDatabase';
 const workerDatabase = 'workerDatabase';
-
 
 function assignOrderToWorker(request, success, error) {
     var client = new MongoClient(url);
@@ -38,7 +37,6 @@ function assignOrderToWorker(request, success, error) {
 
     })
 }
-
 
 function readOrders(findParams, callback){
     var client = new MongoClient(url);
@@ -131,7 +129,7 @@ function createInvoice(request, success, error) {
                     {
                         $set: {
                             state: 'payed',
-                            invoice: request['date']
+                            date: request['date']
                         }
                     }, (err,res)=>{
                         assert.equal(null, err);
@@ -144,8 +142,6 @@ function createInvoice(request, success, error) {
 
     })
 }
-
-
 
 module.exports = {
     "assignOrderToWorker" : assignOrderToWorker,

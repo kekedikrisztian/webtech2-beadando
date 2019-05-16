@@ -1,33 +1,41 @@
 import React from 'react';
-
-import SakilaDispatcher from '../dispatcher/SakilaDispatcher'
-import WorkerConstants from "../constants/WorkerConstants";
-import ManagerConstants from "../constants/ManagerConstants";
-import CustomerConstants from "../constants/CustomerConstants";
 import ShutterStore from "../store/ShutterStore";
+import StoreActions from '../actions/StoreActions';
 
-class CustomerForm extends React.Component{
+
+class WorkerForm extends React.Component{
+
     constructor(props) {
         super(props);
-
         this.state = {
             signed: false,
-            jobs: [
-                {id: 0, wid: 1, customer: "Bela", address: "Miskolc, Teknős utca 27.", windowHeight: 100, windowWidth: 200, material: "wood", color: "brown", checked: true},
-                {id: 1, wid: 1, customer: "Erzsi", address: "Szeged, Kaja tér 14.", windowHeight: 120, windowWidth: 180, material: "plastic", color: "white", checked: false},
-                {id: 2, wid: 2, customer: "Jozsi", address: "Győr, Nyúl utca 6.", windowHeight: 90, windowWidth: 220, material: "metal", color: "gray", checked: false}
-            ],
             signWId: undefined,
-            shutters: [],
-            workers: [],
-            orders: []
-        }
+            shutters: ShutterStore._shutters,
+            workers: ShutterStore._workers,
+            orders: ShutterStore._orders
+        };
 
-
+        StoreActions.listOrders();
+        StoreActions.listShutters();
+        StoreActions.listWorkers();
+        this._onChange = this._onChange.bind(this);
         this.handleStateSet = this.handleStateSet.bind(this);
-        this.handleChange = this.handleChange.bind(this);
-        ShutterStore.addChangeListener(this.handleChange);
     }
+
+    _onChange(){
+        this.setState({orders : ShutterStore._orders});
+        this.setState({shutters : ShutterStore._shutters});
+        this.setState({workers : ShutterStore._workers});
+    }
+
+    componentDidMount(){
+        ShutterStore.addChangeListener(this._onChange);
+    }
+
+    componentWillUnmount(){
+        ShutterStore.removeChangeListener(this._onChange)
+    }
+
 
     handleStateSet({ target }) {
         this.setState({
@@ -35,48 +43,19 @@ class CustomerForm extends React.Component{
         });
     }
 
+
     finishOrder = (e) => {
-        let orderID = Number(e.target.name);
-        let workerID = Number(e.target.value);
-        console.log(workerID + ", " + orderID);
-        console.log(e.target.checked);
+        StoreActions.finishOrder(e);
+        StoreActions.listOrders(e);
 
-        SakilaDispatcher.handlePostAction({
-                actionType: WorkerConstants.FINISH_ORDER,
-                payload: {
-                    orderID: orderID,
-                    workerID: workerID
-                }
-            }
-        );
+        alert("OrderID is finished!");
+    };
 
-        e.target.className = "checked input-checkbox";
-        console.log(e.target.checked);
-    }
-
-    componentDidMount(){
-        SakilaDispatcher.handleViewAction(
-            { actionType: WorkerConstants.LIST_PENDING_ORDERS }
-        );
-
-        SakilaDispatcher.handleViewAction(
-            { actionType: ManagerConstants.LIST_WORKERS }
-        );
-
-        SakilaDispatcher.handleViewAction(
-            { actionType: CustomerConstants.LIST_SHUTTERS }
-        );
-    }
-
-    componentWillUnmount(){
-
-    }
 
     signIn = () =>  {
         let validate = false;
 
         this.state.workers.map(worker => {
-            console.log(this.state.signWId + ", " + worker.workerID);
             if(Number(this.state.signWId) === Number(worker.workerID)) {
                 this.setState({signed: true});
                 validate = true;
@@ -84,37 +63,13 @@ class CustomerForm extends React.Component{
         });
 
         if(validate === false) {
-            alert("There isn't worker with id: " + this.state.signWId);
+            alert(this.state.signWId + " worker ID does not exists!");
         }
-    }
+    };
 
     signOut = () =>  {
         this.setState({signed: false});
-    }
-
-    handleChange() {
-        this.state.orders = ShutterStore._orders;
-
-        this.state.workers = ShutterStore._workers;
-
-        this.state.shutters = ShutterStore._shutters;
-    }
-
-    handleSymbolSelect = (e)=>{
-        let newOrders = [...this.state.orders];
-        let selected;
-        newOrders.map(order => {
-            if(Number(order.orderID) === Number(e.target.value)) {
-                selected = order;
-            }
-        })
-        selected.checked = e.target.checked;
-        this.setState({orders:newOrders});
-    }
-
-    sendData () {
-
-    }
+    };
 
     render() {
         return (
@@ -164,7 +119,7 @@ class CustomerForm extends React.Component{
                                 </div>
                                 <div className="input-holder">
                                     {this.state.orders.map(order => (
-                                        Number(worker.workerID) === Number(order.workerID)
+                                        Number(worker.workerID) === Number(order.workerID) && order.state === "inprogress"
                                         ?
                                         <div>
                                             <div>
@@ -229,7 +184,7 @@ class CustomerForm extends React.Component{
                                             <div className="mt-16">
                                                 <label className="checkbox-holder">
                                                     <input className="input-checkbox" type="checkbox"
-                                                           value={worker.workerID} name={order.orderID} checked={order.state === "finished" || order.state === "payed"}
+                                                           value={worker.workerID} name={order.orderID}
                                                            onChange={this.finishOrder}/>
                                                     <span className="checkbox">
                                                     <strong>finished</strong>
@@ -259,4 +214,4 @@ class CustomerForm extends React.Component{
     }
 }
 
-export default CustomerForm;
+export default WorkerForm;

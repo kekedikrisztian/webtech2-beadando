@@ -1,12 +1,10 @@
 const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 
-const url = 'mongodb://localhost:27017';
+const url = 'mongodb://172.21.0.10:27017';
 const dbName = 'shutter-shop';
 
 const orderDatabase = 'orderDatabase';
-
-
 
 function markOrderAsPacked(request, success, error) {
     var client = new MongoClient(url);
@@ -37,12 +35,9 @@ function markOrderAsPacked(request, success, error) {
                     });
                 client.close();
             }
-
         })
-
     })
 }
-
 
 function readOrders(findParams, callback){
     var client = new MongoClient(url);
@@ -67,8 +62,6 @@ function readAllOrders(callback){
 function readOrdersByID(orderID,callback){
     readOrders({"orderID" : orderID},(result) => {callback(result)})
 }
-
-
 
 module.exports = {
     "markOrderAsPacked": markOrderAsPacked,
