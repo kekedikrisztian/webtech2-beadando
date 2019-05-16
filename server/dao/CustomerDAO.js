@@ -3,6 +3,7 @@ const assert = require('assert');
 
 const url = 'mongodb://172.21.0.10:27017';
 const dbName = 'shutter-shop';
+
 const customerDatabase = 'customerDatabase';
 const orderDatabase = 'orderDatabase';
 const shutterDatabase = 'shutterDatabase';

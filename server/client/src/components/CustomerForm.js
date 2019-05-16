@@ -2,6 +2,7 @@ import React from 'react'
 import ShutterStore from "../store/ShutterStore";
 import StoreActions from "../actions/StoreActions";
 
+const emailRegexp = new RegExp('\\S+@\\S+\\.\\S+','i');
 
 class CustomerForm extends React.Component{
 
@@ -51,13 +52,19 @@ class CustomerForm extends React.Component{
     };
 
     registration = (id) => {
-        id = this.state.customers.length+1;
-        StoreActions.registration(id);
+        id = this.state.customers.length + 1;
 
-        this.state.signedCustomer = id;
-        this.setState({signed: true});
+        if(emailRegexp.test(document.getElementById("email").value)) {
+            StoreActions.registration(id);
 
-        alert("Your registration is succeed!");
+            this.state.signedCustomer = id;
+            this.setState({signed: true});
+
+            alert("Your registration is succeed!");
+        }
+        else {
+            alert("This e-mail is invalid!");
+        }
     };
 
     signOut = () =>  {
