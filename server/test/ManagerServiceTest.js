@@ -3,7 +3,7 @@ const sinon = require('sinon');
 
 const service = require('../services/ManagerService');
 
-describe('Customer Service Test',function(){
+describe('Manager Service Test',function(){
 
 
     it('list customer from DB',function(){
